@@ -1,6 +1,6 @@
 import pygame
 
-from noise import pnoise2 as pnoise
+from noise import pnoise2
 import numpy as np
 
 import random
@@ -16,10 +16,12 @@ def create_heightmap(dim, noise):
         return val
 
     hmap = np.fromfunction(np.vectorize(to_filtered_tuple), (width, height, 3))
-    
+
     return hmap.astype('uint8')
 
-hmap = create_heightmap(dim, lambda x, y: random.randint(0, 1))
+base = np.random.randint(0, 100)
+
+hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, base=base))
 
 clock = pygame.time.Clock()
 surf = pygame.surfarray.make_surface(hmap)
