@@ -33,15 +33,15 @@ def create_noisemap(dim, mapper):
     nmap = np.fromfunction(filtered_mapper, dim)
     return nmap
 
-def create_colormap(hmap, bmap):
-    width, height = hmap.shape
-    colormap = np.zeros((width, height, 3))
+def color_map(nmap, colorer):
+    width, height = nmap.shape
+    cmap = np.zeros((width, height, 3))
 
     for x in range(width):
         for y in range(height):
-            colormap[x][y] = biomes.biome(hmap[x][y], bmap[x][y])
-
-    return colormap.astype('uint8')
+            cmap[x][y] = colorer(x, y)
+    
+    return cmap.astype('uint8')
 
 def update_screen():
     print('=== GENERATING NEW MAP ===')
@@ -52,7 +52,7 @@ def update_screen():
     base = np.random.randint(0, 100)
     hmap = create_normalized_map(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
     print('[3/4] height map generated...')
-    cmap = create_colormap(hmap, bmap)
+    cmap = color_map(hmap, lambda x, y: biomes.biome(hmap[x][y], bmap[x][y]))
     surf = pygame.surfarray.make_surface(cmap)
     display.blit(surf, (0, 0))
     print('[4/4] done!')
