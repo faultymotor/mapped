@@ -16,10 +16,10 @@ rgbs = [
 
 def get_rgb(height):
     idx = 0
-    if height > 20: idx = 1
-    if height > 25: idx = 2
-    if height > 70: idx = 3
-    if height > 75: idx = 4
+    if height > 20 / 255: idx = 1
+    if height > 25 / 255: idx = 2
+    if height > 70 / 255: idx = 3
+    if height > 75 / 255: idx = 4
     return rgbs[idx]
 
 def create_heightmap(dim, noise):
@@ -27,25 +27,29 @@ def create_heightmap(dim, noise):
 
     def to_filtered_tuple(x, y, z):
         val = noise(x / width, y / height)
-        val = int(255 * abs(val))
         return get_rgb(val)[int(z)]
 
-    hmap = np.fromfunction(np.vectorize(to_filtered_tuple), (width, height, 3))
+    to_filtered_tuple = np.vectorize(to_filtered_tuple)
+
+    hmap = np.fromfunction(to_filtered_tuple, (width, height, 3))
 
     return hmap.astype('uint8')
 
 def update_screen():
-    print("=== GENERATING NEW MAP ===")
+    print('=== GENERATING NEW MAP ===')
     base = np.random.randint(0, 100)
-    print("[1/4] seed generated...")
+    print('[1/4] seed generated...')
     hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
-    print("[2/4] heightmap generated...")
+    print('[2/4] heightmap generated...')
     surf = pygame.surfarray.make_surface(hmap)
-    print("[3/4] surface generated...")
+    print('[3/4] surface generated...')
     display.blit(surf, (0, 0))
-    print("[4/4] blit generated!")
+    print('[4/4] done!')
 
 clock = pygame.time.Clock()
+
+pygame.init()
+pygame.display.set_caption('mapped')
 display = pygame.display.set_mode(dim)
 
 update_screen()
