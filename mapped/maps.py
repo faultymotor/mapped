@@ -12,8 +12,16 @@ class Map():
         self.create_mapper = lambda base, octaves: np.vectorize(lambda x, y: pnoise(x / width, y / height, base=base, octaves=octaves, repeatx=repeatx, repeaty=repeaty))
 
         self.dmap = np.zeros(self.dim3)
-        self.bmap, self.hmap = Map.create_normalized_map(self.dim, self.create_mapper, 6), Map.create_normalized_map(self.dim, self.create_mapper, 8)
+        self.bmap, self.hmap = Map.create_normalized_map(self.dim, self.create_mapper, 8), Map.create_normalized_map(self.dim, self.create_mapper, 8)
         self.construct_display_map()
+
+    def sample(self, x, y):
+        return {
+            'x': x,
+            'y': y,
+            'elevation': str(round(self.hmap[x][y] * 15 - 5, 2)) + 'km',
+            'moisture': str(int(self.bmap[x][y] * 100)) + '%',
+        }
 
     def cycle_mode(self):
         if self.mode == 'color': self.mode = 'height'
