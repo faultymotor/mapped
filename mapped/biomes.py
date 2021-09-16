@@ -4,12 +4,11 @@ BEACH = [255, 209, 2]
 
 SCORCHED = [188, 188, 188]
 BARE = [116, 116, 116]
-TUNDRA = [125, 92, 64]
 SNOW = [255, 254, 254]
 
 TEMPERATE_DESERT = [225, 184, 14]
 SHRUBLAND = [131, 151, 0]
-TAIGA = [1, 118, 114]
+TAIGA = [2, 129, 53]
 
 GRASSLAND = [99, 136, 5]
 TEMPERATE_DECIDUOUS_FOREST = [1, 109, 0]
@@ -29,23 +28,22 @@ def biome(elevation, moisture):
     if elevation < 0.12: return BEACH
     
     if elevation > 0.8:
-        if moisture < 0.1: return SCORCHED
-        if moisture < 0.2: return BARE
-        if moisture < 0.5: return TUNDRA
+        if moisture < 0.4: return SCORCHED
+        if moisture < 0.6: return BARE
         return SNOW
 
     if elevation > 0.6:
-        if moisture < 0.33: return TEMPERATE_DESERT
-        if moisture < 0.66: return SHRUBLAND
+        #if moisture < 0.33: return TEMPERATE_DESERT
+        #if moisture < 0.66: return SHRUBLAND
         return TAIGA
 
     if elevation > 0.3:
-        if moisture < 0.16: return TEMPERATE_DESERT
-        if moisture < 0.50: return GRASSLAND
-        if moisture < 0.83: return TEMPERATE_DECIDUOUS_FOREST
+        #if moisture < 0.16: return TEMPERATE_DESERT
+        #if moisture < 0.50: return GRASSLAND
+        #if moisture < 0.83: return TEMPERATE_DECIDUOUS_FOREST
         return TEMPERATE_RAIN_FOREST
 
-    if moisture < 0.16: return SUBTROPICAL_DESERT
-    if moisture < 0.33: return GRASSLAND
-    if moisture < 0.66: return TROPICAL_SEASONAL_FOREST
+    #if moisture < 0.16: return SUBTROPICAL_DESERT
+    #if moisture < 0.33: return GRASSLAND
+    #if moisture < 0.66: return TROPICAL_SEASONAL_FOREST
     return TROPICAL_RAIN_FOREST

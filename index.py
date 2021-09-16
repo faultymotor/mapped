@@ -6,37 +6,54 @@ import random
 
 from mapped import biomes
 
-def create_biomemap(dim, noise):
+def create_normalized_map(dim, noise):
     width, height = dim
-    return create_noisemap(dim, lambda x, y: noise(x / width, y / height))
+    nmap = create_noisemap(dim, lambda x, y: noise(x / width, y / height))
+    min_val, max_val = np.min(nmap), np.max(nmap)
+    normalize = lambda val: (val - min_val) / (max_val - min_val)
+    normalize = np.vectorize(normalize)
 
-def create_heightmap(dim, noise, bmap):
-    width, height = dim
+    return normalize(nmap)
 
-    def mapper(x, y, z):
-        x, y, z = int(x), int(y), int(z)
-        elevation = noise(x / width, y / height)
-        moisture = bmap[x][y]
-        biome = biomes.biome(elevation, moisture)
-        return biome[z]
+# def create_heightmap(dim, noise, bmap):
+#     width, height = dim
 
-    return create_noisemap((width, height, 3), mapper)
+#     def mapper(x, y, z):
+#         x, y, z = int(x), int(y), int(z)
+#         elevation = noise(x / width, y / height)
+#         elevation = pow(elevation * 1.3, 4)
+#         moisture = bmap[x][y]
+#         biome = biomes.biome(elevation, moisture)
+#         return biome[z]
+
+#     return create_noisemap((width, height, 3), mapper)
 
 def create_noisemap(dim, mapper):
     filtered_mapper = np.vectorize(mapper)
     nmap = np.fromfunction(filtered_mapper, dim)
     return nmap
 
+def create_colormap(hmap, bmap):
+    width, height = hmap.shape
+    colormap = np.zeros((width, height, 3))
+
+    for x in range(width):
+        for y in range(height):
+            colormap[x][y] = biomes.biome(hmap[x][y], bmap[x][y])
+
+    return colormap.astype('uint8')
+
 def update_screen():
     print('=== GENERATING NEW MAP ===')
     print('[1/4] seed generated...')
     base = np.random.randint(0, 100)
-    bmap = create_biomemap(dim, lambda x, y: pnoise2(x, y, octaves=5, base=base))
+    bmap = create_normalized_map(dim, lambda x, y: pnoise2(x, y, octaves=6, base=base))
     print('[2/4] biome map generated...')
     base = np.random.randint(0, 100)
-    hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base), bmap)
+    hmap = create_normalized_map(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
     print('[3/4] height map generated...')
-    surf = pygame.surfarray.make_surface(hmap.astype('uint8'))
+    cmap = create_colormap(hmap, bmap)
+    surf = pygame.surfarray.make_surface(cmap)
     display.blit(surf, (0, 0))
     print('[4/4] done!')
     return bmap
