@@ -25,11 +25,12 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # if event.type == 768: # pygame.K_TAB doesn't work for some reason?
-        #     nmap = create_new_map()
-        #     draw_map_to_screen(nmap, display)
-        if event.type == 768:
-            map_obj.cycle_mode()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                map_obj = maps.Map(dim)
+                draw_map_to_screen(map_obj.dmap, display)
+            elif event.key == pygame.K_SPACE:
+                map_obj.cycle_mode()
 
     draw_map_to_screen(map_obj.dmap, display)
     pygame.display.update()
