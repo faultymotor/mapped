@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import random
 
-dim = (1024, 768)
+dim = (700, 700)
 
 rgbs = [
     [65, 105, 225], # 0 Water
@@ -34,16 +34,30 @@ def create_heightmap(dim, noise):
 
     return hmap.astype('uint8')
 
-base = np.random.randint(0, 100)
+def update_screen():
+    print("=== GENERATING NEW MAP ===")
+    base = np.random.randint(0, 100)
+    print("[1/4] seed generated...")
+    hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
+    print("[2/4] heightmap generated...")
+    surf = pygame.surfarray.make_surface(hmap)
+    print("[3/4] surface generated...")
+    display.blit(surf, (0, 0))
+    print("[4/4] blit generated!")
 
-hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
 clock = pygame.time.Clock()
-surf = pygame.surfarray.make_surface(hmap)
 display = pygame.display.set_mode(dim)
-display.blit(surf, (0, 0))
 
-pygame.display.update()
+update_screen()
 
-while True:
+running = True
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == 768: # pygame.K_TAB doesn't work for some reason?
+            update_screen()
+
     pygame.display.update()
     clock.tick(60)
