@@ -4,7 +4,7 @@ BEACH = [255, 209, 2]
 
 SCORCHED = [188, 188, 188]
 BARE = [116, 116, 116]
-TUNDRA = [125, 92, 64
+TUNDRA = [125, 92, 64]
 SNOW = [255, 254, 254]
 
 TEMPERATE_DESERT = [225, 184, 14]
@@ -21,7 +21,7 @@ TROPICAL_RAIN_FOREST = [41, 109, 0]
 
 def biome(elevation, moisture):
     """
-    Find biomelevation corresponding to given elevation and moisture.
+    Find biome corresponding to given elevation and moisture.
     Based on https://www.redblobgames.com/maps/terrain-from-noise/
     """
     if elevation < 0.05: return DEEP_OCEAN

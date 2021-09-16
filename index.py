@@ -4,48 +4,44 @@ import numpy as np
 import sys
 import random
 
-dim = (700, 700)
+from mapped import biomes
 
-rgbs = [
-    [65, 105, 225], # 0 Water
-    [238, 213, 180], # 1 Beach
-    [168, 211, 171], # 2 Land
-    [159, 146, 134], # 3 Hill
-    [224, 224, 224], # 4 Snow
-]
+def create_biomemap(dim, noise):
+    width, height = dim
+    return create_noisemap(dim, lambda x, y: noise(x / width, y / height))
 
-def get_rgb(height):
-    idx = 0
-    if height > 20 / 255: idx = 1
-    if height > 25 / 255: idx = 2
-    if height > 70 / 255: idx = 3
-    if height > 75 / 255: idx = 4
-    return rgbs[idx]
-
-def create_heightmap(dim, noise):
+def create_heightmap(dim, noise, bmap):
     width, height = dim
 
-    def to_filtered_tuple(x, y, z):
-        val = noise(x / width, y / height)
-        return get_rgb(val)[int(z)]
+    def mapper(x, y, z):
+        x, y, z = int(x), int(y), int(z)
+        elevation = noise(x / width, y / height)
+        moisture = bmap[x][y]
+        biome = biomes.biome(elevation, moisture)
+        return biome[z]
 
-    to_filtered_tuple = np.vectorize(to_filtered_tuple)
+    return create_noisemap((width, height, 3), mapper)
 
-    hmap = np.fromfunction(to_filtered_tuple, (width, height, 3))
-
-    return hmap.astype('uint8')
+def create_noisemap(dim, mapper):
+    filtered_mapper = np.vectorize(mapper)
+    nmap = np.fromfunction(filtered_mapper, dim)
+    return nmap
 
 def update_screen():
     print('=== GENERATING NEW MAP ===')
-    base = np.random.randint(0, 100)
     print('[1/4] seed generated...')
-    hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base))
-    print('[2/4] heightmap generated...')
-    surf = pygame.surfarray.make_surface(hmap)
-    print('[3/4] surface generated...')
+    base = np.random.randint(0, 100)
+    bmap = create_biomemap(dim, lambda x, y: pnoise2(x, y, octaves=5, base=base))
+    print('[2/4] biome map generated...')
+    base = np.random.randint(0, 100)
+    hmap = create_heightmap(dim, lambda x, y: pnoise2(x, y, octaves=8, base=base), bmap)
+    print('[3/4] height map generated...')
+    surf = pygame.surfarray.make_surface(hmap.astype('uint8'))
     display.blit(surf, (0, 0))
     print('[4/4] done!')
+    return bmap
 
+dim = (700, 700)
 clock = pygame.time.Clock()
 
 pygame.init()
@@ -61,7 +57,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == 768: # pygame.K_TAB doesn't work for some reason?
-            update_screen()
+            bmap = update_screen()
 
     pygame.display.update()
     clock.tick(60)
